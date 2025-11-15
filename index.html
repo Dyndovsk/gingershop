@@ -620,7 +620,20 @@
     </footer>
 
     <script>
-        // Ключи для localStorage
+        // КОНФИГУРАЦИЯ GOOGLE SHEETS - ЗАМЕНИТЕ НА ВАШИ ДАННЫЕ
+        const GOOGLE_SHEETS_CONFIG = {
+            // ID таблицы (из URL между /d/ и /edit)
+            // Пример: https://docs.google.com/spreadsheets/d/1ABC123def456GHI789jkl/edit#gid=0
+            spreadsheetId: '1YOUR_SPREADSHEET_ID_HERE',
+            
+            // Имя листа в таблице
+            sheetName: 'Products',
+            
+            // Ваш API ключ (нужно создать в Google Cloud Console)
+            apiKey: 'YOUR_GOOGLE_API_KEY_HERE'
+        };
+
+        // Ключи для localStorage (как запасной вариант)
         const STORAGE_KEYS = {
             PRODUCTS: 'ginger_shop_products',
             RESERVATIONS: 'ginger_shop_reservations'
@@ -630,22 +643,64 @@
         let products = [];
         let cart = [];
 
-        // Загрузка данных о товарах
-        function loadProducts() {
+        // Загрузка данных из Google Sheets
+        async function loadProducts() {
             try {
-                // Пробуем загрузить из localStorage
+                showLoading();
+                
+                // Пробуем загрузить из Google Sheets
+                const sheetsData = await loadFromGoogleSheets();
+                
+                if (sheetsData && sheetsData.length > 0) {
+                    products = parseGoogleSheetsData(sheetsData);
+                    console.log('Данные загружены из Google Sheets:', products);
+                } else {
+                    // Если не удалось загрузить из Google Sheets, используем localStorage
+                    throw new Error('Не удалось загрузить из Google Sheets');
+                }
+                
+                hideLoading();
+                initProducts();
+                
+            } catch (error) {
+                console.error('Ошибка загрузки из Google Sheets:', error);
+                // Используем localStorage как запасной вариант
+                await loadFromLocalStorage();
+            }
+        }
+
+        // Загрузка данных из Google Sheets
+        async function loadFromGoogleSheets() {
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.spreadsheetId}/values/${GOOGLE_SHEETS_CONFIG.sheetName}?key=${GOOGLE_SHEETS_CONFIG.apiKey}`;
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data.values;
+            } catch (error) {
+                console.error('Ошибка загрузки из Google Sheets:', error);
+                return null;
+            }
+        }
+
+        // Загрузка из localStorage
+        async function loadFromLocalStorage() {
+            try {
                 const savedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
                 const savedReservations = localStorage.getItem(STORAGE_KEYS.RESERVATIONS);
                 
                 if (savedProducts) {
                     products = JSON.parse(savedProducts);
                 } else {
-                    // Инициализируем начальные данные
                     products = getDefaultProducts();
-                    saveProducts();
+                    saveToLocalStorage();
                 }
 
-                // Загружаем бронирования и обновляем продукты
                 if (savedReservations) {
                     const reservations = JSON.parse(savedReservations);
                     updateProductsWithReservations(reservations);
@@ -654,11 +709,135 @@
                 hideLoading();
                 initProducts();
             } catch (error) {
-                console.error('Ошибка загрузки данных:', error);
+                console.error('Ошибка загрузки из localStorage:', error);
                 products = getDefaultProducts();
                 hideLoading();
                 initProducts();
             }
+        }
+
+        // Парсинг данных из Google Sheets
+        function parseGoogleSheetsData(sheetsData) {
+            if (!sheetsData || sheetsData.length < 2) return [];
+            
+            const headers = sheetsData[0];
+            const rows = sheetsData.slice(1);
+            
+            return rows.map((row, index) => {
+                // Создаем массив изображений из строки
+                const images = row[5] ? row[5].split(',').map(img => img.trim()) : [];
+                
+                // Если нет изображений, используем placeholder
+                if (images.length === 0) {
+                    images.push(`https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Товар+${index + 1}`);
+                }
+                
+                const product = {
+                    id: parseInt(row[0]) || index + 1,
+                    title: row[1] || 'Без названия',
+                    price: parseInt(row[2]) || 0,
+                    stock: parseInt(row[3]) || 0,
+                    reserved: parseInt(row[4]) || 0,
+                    images: images
+                };
+                return product;
+            }).filter(product => product.title !== 'Без названия'); // Фильтруем пустые строки
+        }
+
+        // Сохранение бронирований в Google Sheets через Google Apps Script
+        async function saveReservationsToGoogleSheets(reservations) {
+            try {
+                // URL вашего Google Apps Script веб-приложения
+                const scriptUrl = 'https://script.google.com/macros/s/1kbFFxwRQwLYf99Tv-YXAoztkpIhqaqtntD80cJVKq5o/exec';
+                
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'updateReservations',
+                        reservations: reservations
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка сохранения в Google Sheets');
+                }
+
+                const result = await response.json();
+                return result.success;
+            } catch (error) {
+                console.error('Ошибка сохранения в Google Sheets:', error);
+                return false;
+            }
+        }
+
+        // Обновление продуктов с учетом бронирований
+        function updateProductsWithReservations(reservations) {
+            products.forEach(product => {
+                product.reserved = 0;
+            });
+
+            reservations.forEach(reservation => {
+                const product = products.find(p => p.id === reservation.productId);
+                if (product) {
+                    product.reserved += reservation.quantity;
+                }
+            });
+        }
+
+        // Сохранение в localStorage
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+                return true;
+            } catch (error) {
+                console.error('Ошибка сохранения в localStorage:', error);
+                return false;
+            }
+        }
+
+        // Сохранение бронирований
+        async function saveReservations(reservations) {
+            // Сначала пробуем сохранить в Google Sheets
+            const googleSheetsSuccess = await saveReservationsToGoogleSheets(reservations);
+            
+            if (googleSheetsSuccess) {
+                // Если успешно сохранили в Google Sheets, обновляем локальные данные
+                await loadProducts(); // Перезагружаем актуальные данные
+                return true;
+            } else {
+                // Если не удалось сохранить в Google Sheets, сохраняем в localStorage
+                return saveReservationsToLocalStorage(reservations);
+            }
+        }
+
+        // Сохранение бронирований в localStorage
+        function saveReservationsToLocalStorage(reservations) {
+            try {
+                const existingReservations = JSON.parse(localStorage.getItem(STORAGE_KEYS.RESERVATIONS) || '[]');
+                const updatedReservations = [...existingReservations, ...reservations];
+                
+                localStorage.setItem(STORAGE_KEYS.RESERVATIONS, JSON.stringify(updatedReservations));
+                updateProductsWithReservations(updatedReservations);
+                saveToLocalStorage();
+                
+                return true;
+            } catch (error) {
+                console.error('Ошибка сохранения бронирований в localStorage:', error);
+                return false;
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('products-container').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('products-container').style.display = 'grid';
         }
 
         // Функция для получения данных по умолчанию
@@ -714,72 +893,11 @@
             ];
         }
 
-        // Обновление продуктов с учетом бронирований
-        function updateProductsWithReservations(reservations) {
-            // Сбрасываем reserved для всех продуктов
-            products.forEach(product => {
-                product.reserved = 0;
-            });
-
-            // Применяем бронирования
-            reservations.forEach(reservation => {
-                const product = products.find(p => p.id === reservation.productId);
-                if (product) {
-                    product.reserved += reservation.quantity;
-                }
-            });
-        }
-
-        // Сохранение продуктов в localStorage
-        function saveProducts() {
-            try {
-                localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
-                return true;
-            } catch (error) {
-                console.error('Ошибка сохранения продуктов:', error);
-                return false;
-            }
-        }
-
-        // Сохранение бронирований в localStorage
-        function saveReservations(reservations) {
-            try {
-                // Загружаем существующие бронирования
-                const existingReservations = JSON.parse(localStorage.getItem(STORAGE_KEYS.RESERVATIONS) || '[]');
-                
-                // Добавляем новые бронирования
-                const updatedReservations = [...existingReservations, ...reservations];
-                
-                // Сохраняем обновленный список
-                localStorage.setItem(STORAGE_KEYS.RESERVATIONS, JSON.stringify(updatedReservations));
-                
-                // Обновляем продукты с учетом новых бронирований
-                updateProductsWithReservations(updatedReservations);
-                saveProducts();
-                
-                return true;
-            } catch (error) {
-                console.error('Ошибка сохранения бронирований:', error);
-                return false;
-            }
-        }
-
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('products-container').style.display = 'none';
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('products-container').style.display = 'grid';
-        }
-
         // Функция для получения доступного количества товара
         function getAvailableQuantity(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return 0;
             
-            // Учитываем уже забронированные товары и товары в корзине
             const reservedInCart = cart.find(item => item.id === productId)?.quantity || 0;
             return product.stock - product.reserved - reservedInCart;
         }
@@ -946,14 +1064,12 @@
                 hideError();
                 updateFormState();
                 
-                // Анимация добавления
                 addToCartBtn.textContent = 'Добавлено!';
                 setTimeout(() => {
                     addToCartBtn.textContent = 'Добавить в корзину';
                 }, 1000);
             });
             
-            // Инициализируем состояние формы
             updateFormState();
         }
 
@@ -1063,7 +1179,6 @@
                 
                 reserveAllBtn.disabled = false;
                 
-                // Проверяем наличие предупреждений о количестве
                 const warnings = [];
                 cart.forEach(item => {
                     const available = getAvailableQuantity(item.id);
@@ -1079,7 +1194,6 @@
                     stockWarning.textContent = '';
                 }
                 
-                // Обработчики для элементов корзины
                 document.querySelectorAll('.minus-cart-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const productId = parseInt(e.target.dataset.productId);
@@ -1123,10 +1237,9 @@
         }
 
         // Функция бронирования всех товаров
-        function reserveAllItems() {
+        async function reserveAllItems() {
             if (cart.length === 0) return;
             
-            // Проверяем, что все товары доступны в нужном количестве
             for (const item of cart) {
                 const available = getAvailableQuantity(item.id);
                 if (item.quantity > available) {
@@ -1135,7 +1248,6 @@
                 }
             }
             
-            // Формируем сообщение для Telegram
             let message = "Здравствуйте! Хочу забронировать следующие товары:\n\n";
             
             cart.forEach(item => {
@@ -1145,30 +1257,25 @@
             const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             message += `\nИтого: ${totalAmount} руб.`;
             
-            // Сохраняем бронирования
             const reservations = cart.map(item => ({
                 productId: item.id,
                 quantity: item.quantity,
                 date: new Date().toISOString()
             }));
             
-            const saveSuccess = saveReservations(reservations);
+            const saveSuccess = await saveReservations(reservations);
             
             if (saveSuccess) {
-                // Кодируем сообщение для URL
                 const encodedMessage = encodeURIComponent(message);
                 const telegramUrl = `https://t.me/Tasha_ginger_art?text=${encodedMessage}`;
                 
-                // Открываем Telegram
                 window.open(telegramUrl, '_blank');
                 
-                // Очищаем корзину после бронирования
                 cart = [];
                 updateCartUI();
                 updateAllProductCards();
                 closeCartModal();
                 
-                // Показываем подтверждение
                 alert('Ваш заказ отправлен в Telegram! Товары забронированы.');
             } else {
                 alert('Ошибка сохранения бронирования. Пожалуйста, попробуйте еще раз.');
@@ -1206,10 +1313,8 @@
             const closeCartBtn = document.getElementById('close-cart');
             const reserveAllBtn = document.getElementById('reserve-all-btn');
             
-            // Загружаем товары
             loadProducts();
             
-            // Обработчики для корзины
             cartIcon.addEventListener('click', openCartModal);
             closeCartBtn.addEventListener('click', closeCartModal);
             reserveAllBtn.addEventListener('click', reserveAllItems);
@@ -1220,7 +1325,6 @@
                 }
             });
             
-            // Инициализируем UI корзины
             updateCartUI();
         });
     </script>
