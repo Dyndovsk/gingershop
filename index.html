@@ -83,21 +83,7 @@
             width: 100%;
             height: 300px;
             overflow: hidden;
-        }
-        
-        .banner-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .banner-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(76, 175, 80, 0.3);
+            background: linear-gradient(135deg, var(--green), var(--dark-green));
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -108,15 +94,13 @@
         }
         
         .banner h1 {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         
         .banner p {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             max-width: 600px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
         
         /* Основной контент */
@@ -328,6 +312,12 @@
             text-align: center;
             padding: 40px;
             color: var(--green);
+        }
+
+        .error-container {
+            text-align: center;
+            padding: 40px;
+            color: var(--error);
         }
 
         /* Стили для корзины */
@@ -575,18 +565,18 @@
 
     <!-- Баннер -->
     <div class="banner">
-        <img src="images/banner.jpg" alt="GingerShop - Натуральные товары" class="banner-image">
-        <div class="banner-overlay">
-            <h1>GingerShop</h1>
-            <p>Натуральные товары для здорового образа жизни</p>
-        </div>
+        <h1>GingerShop</h1>
+        <p>Натуральные товары для здорового образа жизни</p>
     </div>
 
     <!-- Основной контент -->
     <main>
         <div class="container">
             <div id="loading" class="loading">
-                <p>Загрузка товаров...</p>
+                <p>Загрузка товаров из Google Sheets...</p>
+            </div>
+            <div id="error-container" class="error-container" style="display: none;">
+                <p>Ошибка загрузки данных. Пожалуйста, проверьте настройки Google Sheets.</p>
             </div>
             <div class="products-grid" id="products-container" style="display: none;">
                 <!-- Карточки товаров будут добавлены с помощью JavaScript -->
@@ -654,25 +644,23 @@
                 if (sheetsData && sheetsData.length > 0) {
                     products = parseGoogleSheetsData(sheetsData);
                     console.log('Данные загружены из Google Sheets:', products);
+                    hideLoading();
+                    initProducts();
                 } else {
-                    // Если не удалось загрузить из Google Sheets, используем localStorage
-                    throw new Error('Не удалось загрузить из Google Sheets');
+                    // Если не удалось загрузить из Google Sheets, показываем ошибку
+                    throw new Error('Не удалось загрузить данные из Google Sheets');
                 }
-                
-                hideLoading();
-                initProducts();
                 
             } catch (error) {
                 console.error('Ошибка загрузки из Google Sheets:', error);
-                // Используем localStorage как запасной вариант
-                await loadFromLocalStorage();
+                showError();
             }
         }
 
         // Загрузка данных из Google Sheets
         async function loadFromGoogleSheets() {
             try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.spreadsheetId}/values/${GOOGLE_SHEETS_CONFIG.sheetName}?key=${GOOGLE_SHEETS_CONFIG.apiKey}`;
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.1kbFFxwRQwLYf99Tv-YXAoztkpIhqaqtntD80cJVKq5o}/values/${GOOGLE_SHEETS_CONFIG.sheetName}?key=${GOOGLE_SHEETS_CONFIG.AIzaSyBRwKMmS9a9WftNvlRuDV21D-EKSInj5aw}`;
                 
                 const response = await fetch(url);
                 
@@ -685,34 +673,6 @@
             } catch (error) {
                 console.error('Ошибка загрузки из Google Sheets:', error);
                 return null;
-            }
-        }
-
-        // Загрузка из localStorage
-        async function loadFromLocalStorage() {
-            try {
-                const savedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-                const savedReservations = localStorage.getItem(STORAGE_KEYS.RESERVATIONS);
-                
-                if (savedProducts) {
-                    products = JSON.parse(savedProducts);
-                } else {
-                    products = getDefaultProducts();
-                    saveToLocalStorage();
-                }
-
-                if (savedReservations) {
-                    const reservations = JSON.parse(savedReservations);
-                    updateProductsWithReservations(reservations);
-                }
-
-                hideLoading();
-                initProducts();
-            } catch (error) {
-                console.error('Ошибка загрузки из localStorage:', error);
-                products = getDefaultProducts();
-                hideLoading();
-                initProducts();
             }
         }
 
@@ -744,153 +704,22 @@
             }).filter(product => product.title !== 'Без названия'); // Фильтруем пустые строки
         }
 
-        // Сохранение бронирований в Google Sheets через Google Apps Script
-        async function saveReservationsToGoogleSheets(reservations) {
-            try {
-                // URL вашего Google Apps Script веб-приложения
-                const scriptUrl = 'https://script.google.com/macros/s/1kbFFxwRQwLYf99Tv-YXAoztkpIhqaqtntD80cJVKq5o/exec';
-                
-                const response = await fetch(scriptUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'updateReservations',
-                        reservations: reservations
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Ошибка сохранения в Google Sheets');
-                }
-
-                const result = await response.json();
-                return result.success;
-            } catch (error) {
-                console.error('Ошибка сохранения в Google Sheets:', error);
-                return false;
-            }
-        }
-
-        // Обновление продуктов с учетом бронирований
-        function updateProductsWithReservations(reservations) {
-            products.forEach(product => {
-                product.reserved = 0;
-            });
-
-            reservations.forEach(reservation => {
-                const product = products.find(p => p.id === reservation.productId);
-                if (product) {
-                    product.reserved += reservation.quantity;
-                }
-            });
-        }
-
-        // Сохранение в localStorage
-        function saveToLocalStorage() {
-            try {
-                localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
-                return true;
-            } catch (error) {
-                console.error('Ошибка сохранения в localStorage:', error);
-                return false;
-            }
-        }
-
-        // Сохранение бронирований
-        async function saveReservations(reservations) {
-            // Сначала пробуем сохранить в Google Sheets
-            const googleSheetsSuccess = await saveReservationsToGoogleSheets(reservations);
-            
-            if (googleSheetsSuccess) {
-                // Если успешно сохранили в Google Sheets, обновляем локальные данные
-                await loadProducts(); // Перезагружаем актуальные данные
-                return true;
-            } else {
-                // Если не удалось сохранить в Google Sheets, сохраняем в localStorage
-                return saveReservationsToLocalStorage(reservations);
-            }
-        }
-
-        // Сохранение бронирований в localStorage
-        function saveReservationsToLocalStorage(reservations) {
-            try {
-                const existingReservations = JSON.parse(localStorage.getItem(STORAGE_KEYS.RESERVATIONS) || '[]');
-                const updatedReservations = [...existingReservations, ...reservations];
-                
-                localStorage.setItem(STORAGE_KEYS.RESERVATIONS, JSON.stringify(updatedReservations));
-                updateProductsWithReservations(updatedReservations);
-                saveToLocalStorage();
-                
-                return true;
-            } catch (error) {
-                console.error('Ошибка сохранения бронирований в localStorage:', error);
-                return false;
-            }
-        }
-
         function showLoading() {
             document.getElementById('loading').style.display = 'block';
+            document.getElementById('error-container').style.display = 'none';
             document.getElementById('products-container').style.display = 'none';
         }
 
         function hideLoading() {
             document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-container').style.display = 'none';
             document.getElementById('products-container').style.display = 'grid';
         }
 
-        // Функция для получения данных по умолчанию
-        function getDefaultProducts() {
-            return [
-                {
-                    id: 1,
-                    title: "Набор эко-посуды",
-                    price: 1500,
-                    stock: 10,
-                    reserved: 0,
-                    images: [
-                        "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Эко-посуда+1",
-                        "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Эко-посуда+2",
-                        "https://via.placeholder.com/300x200/81C784/FFFFFF?text=Эко-посуда+3"
-                    ]
-                },
-                {
-                    id: 2,
-                    title: "Бамбуковая зубная щетка",
-                    price: 250,
-                    stock: 25,
-                    reserved: 0,
-                    images: [
-                        "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Зубная+щетка+1",
-                        "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Зубная+щетка+2"
-                    ]
-                },
-                {
-                    id: 3,
-                    title: "Многоразовые сумки",
-                    price: 450,
-                    stock: 8,
-                    reserved: 0,
-                    images: [
-                        "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Сумки+1",
-                        "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Сумки+2",
-                        "https://via.placeholder.com/300x200/81C784/FFFFFF?text=Сумки+3",
-                        "https://via.placeholder.com/300x200/388E3C/FFFFFF?text=Сумки+4"
-                    ]
-                },
-                {
-                    id: 4,
-                    title: "Эко-косметика",
-                    price: 1200,
-                    stock: 8,
-                    reserved: 0,
-                    images: [
-                        "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Косметика+1",
-                        "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Косметика+2"
-                    ]
-                }
-            ];
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-container').style.display = 'block';
+            document.getElementById('products-container').style.display = 'none';
         }
 
         // Функция для получения доступного количества товара
@@ -1237,7 +1066,7 @@
         }
 
         // Функция бронирования всех товаров
-        async function reserveAllItems() {
+        function reserveAllItems() {
             if (cart.length === 0) return;
             
             for (const item of cart) {
@@ -1257,29 +1086,17 @@
             const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             message += `\nИтого: ${totalAmount} руб.`;
             
-            const reservations = cart.map(item => ({
-                productId: item.id,
-                quantity: item.quantity,
-                date: new Date().toISOString()
-            }));
+            const encodedMessage = encodeURIComponent(message);
+            const telegramUrl = `https://t.me/Tasha_ginger_art?text=${encodedMessage}`;
             
-            const saveSuccess = await saveReservations(reservations);
+            window.open(telegramUrl, '_blank');
             
-            if (saveSuccess) {
-                const encodedMessage = encodeURIComponent(message);
-                const telegramUrl = `https://t.me/Tasha_ginger_art?text=${encodedMessage}`;
-                
-                window.open(telegramUrl, '_blank');
-                
-                cart = [];
-                updateCartUI();
-                updateAllProductCards();
-                closeCartModal();
-                
-                alert('Ваш заказ отправлен в Telegram! Товары забронированы.');
-            } else {
-                alert('Ошибка сохранения бронирования. Пожалуйста, попробуйте еще раз.');
-            }
+            cart = [];
+            updateCartUI();
+            updateAllProductCards();
+            closeCartModal();
+            
+            alert('Ваш заказ отправлен в Telegram! Товары забронированы.');
         }
 
         // Функции для работы с модальным окном корзины
@@ -1313,6 +1130,7 @@
             const closeCartBtn = document.getElementById('close-cart');
             const reserveAllBtn = document.getElementById('reserve-all-btn');
             
+            // Загружаем товары из Google Sheets
             loadProducts();
             
             cartIcon.addEventListener('click', openCartModal);
