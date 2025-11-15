@@ -59,6 +59,13 @@
             cursor: pointer;
             font-size: 1.5rem;
             color: var(--dark-green);
+            padding: 5px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .cart-icon:hover {
+            background-color: var(--light-green);
         }
         
         .cart-count {
@@ -177,6 +184,11 @@
             justify-content: center;
             font-weight: bold;
             color: var(--dark-green);
+            transition: background-color 0.3s;
+        }
+        
+        .gallery-btn:hover {
+            background-color: rgba(255, 255, 255, 0.9);
         }
         
         .gallery-dots {
@@ -194,10 +206,15 @@
             border-radius: 50%;
             background-color: rgba(255, 255, 255, 0.5);
             cursor: pointer;
+            transition: background-color 0.3s;
         }
         
         .dot.active {
             background-color: var(--white);
+        }
+        
+        .dot:hover {
+            background-color: rgba(255, 255, 255, 0.8);
         }
         
         /* Информация о товаре */
@@ -263,6 +280,12 @@
             justify-content: center;
             font-weight: bold;
             color: var(--dark-green);
+            transition: background-color 0.3s;
+        }
+        
+        .quantity-btn:hover:not(:disabled) {
+            background-color: var(--green);
+            color: white;
         }
         
         .quantity-btn:disabled {
@@ -290,7 +313,7 @@
             transition: background-color 0.3s;
         }
         
-        .add-to-cart-btn:hover {
+        .add-to-cart-btn:hover:not(:disabled) {
             background-color: var(--dark-green);
         }
         
@@ -314,10 +337,33 @@
             color: var(--green);
         }
 
+        .loading-spinner {
+            border: 4px solid var(--light-green);
+            border-top: 4px solid var(--green);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .error-container {
             text-align: center;
             padding: 40px;
             color: var(--error);
+        }
+
+        .config-info {
+            background-color: var(--light-green);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--green);
         }
 
         /* Стили для корзины */
@@ -343,6 +389,18 @@
             overflow-y: auto;
             padding: 20px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            animation: modalAppear 0.3s ease;
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
         
         .cart-header {
@@ -365,6 +423,11 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: #666;
+            transition: color 0.3s;
+        }
+        
+        .close-cart:hover {
+            color: var(--error);
         }
         
         .cart-items {
@@ -417,6 +480,12 @@
             justify-content: center;
             font-weight: bold;
             color: var(--dark-green);
+            transition: background-color 0.3s;
+        }
+        
+        .cart-quantity-btn:hover:not(:disabled) {
+            background-color: var(--green);
+            color: white;
         }
         
         .cart-quantity-btn:disabled {
@@ -440,6 +509,11 @@
             cursor: pointer;
             margin-left: 10px;
             font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+        
+        .remove-item:hover {
+            transform: scale(1.2);
         }
         
         .cart-total {
@@ -464,7 +538,7 @@
             transition: background-color 0.3s;
         }
         
-        .reserve-all-btn:hover {
+        .reserve-all-btn:hover:not(:disabled) {
             background-color: var(--dark-green);
         }
         
@@ -573,11 +647,29 @@
     <main>
         <div class="container">
             <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
                 <p>Загрузка товаров из Google Sheets...</p>
+                <div id="loading-details" style="margin-top: 10px; font-size: 0.9rem;"></div>
             </div>
+            
+            <div id="config-info" class="config-info" style="display: none;">
+                <h3>Настройка Google Sheets</h3>
+                <p>Для работы магазина необходимо настроить Google Sheets API:</p>
+                <ol>
+                    <li>Создайте таблицу с колонками: ID, Название, Цена, Количество, Забронировано, Изображения</li>
+                    <li>Замените значения в константе GOOGLE_SHEETS_CONFIG на свои</li>
+                    <li>Убедитесь, что таблица доступна для чтения по API</li>
+                </ol>
+            </div>
+            
             <div id="error-container" class="error-container" style="display: none;">
-                <p>Ошибка загрузки данных. Пожалуйста, проверьте настройки Google Sheets.</p>
+                <p>Ошибка загрузки данных из Google Sheets.</p>
+                <p>Проверьте настройки или используйте тестовые данные.</p>
+                <button id="use-test-data" style="margin-top: 15px; padding: 10px 20px; background: var(--green); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Использовать тестовые данные
+                </button>
             </div>
+            
             <div class="products-grid" id="products-container" style="display: none;">
                 <!-- Карточки товаров будут добавлены с помощью JavaScript -->
             </div>
@@ -613,7 +705,6 @@
         // КОНФИГУРАЦИЯ GOOGLE SHEETS - ЗАМЕНИТЕ НА ВАШИ ДАННЫЕ
         const GOOGLE_SHEETS_CONFIG = {
             // ID таблицы (из URL между /d/ и /edit)
-            // Пример: https://docs.google.com/spreadsheets/d/1ABC123def456GHI789jkl/edit#gid=0
             spreadsheetId: '1YOUR_SPREADSHEET_ID_HERE',
             
             // Имя листа в таблице
@@ -623,44 +714,55 @@
             apiKey: 'YOUR_GOOGLE_API_KEY_HERE'
         };
 
-        // Ключи для localStorage (как запасной вариант)
-        const STORAGE_KEYS = {
-            PRODUCTS: 'ginger_shop_products',
-            RESERVATIONS: 'ginger_shop_reservations'
-        };
-
         // Данные товаров
         let products = [];
         let cart = [];
+        let loadStartTime = 0;
 
         // Загрузка данных из Google Sheets
         async function loadProducts() {
             try {
                 showLoading();
+                loadStartTime = Date.now();
+                updateLoadingMessage('Подключаемся к Google Sheets...');
                 
-                // Пробуем загрузить из Google Sheets
-                const sheetsData = await loadFromGoogleSheets();
+                // Проверяем конфигурацию
+                if (GOOGLE_SHEETS_CONFIG.spreadsheetId.includes('YOUR_') || 
+                    GOOGLE_SHEETS_CONFIG.apiKey.includes('YOUR_')) {
+                    throw new Error('Не настроена конфигурация Google Sheets');
+                }
+                
+                // Пробуем загрузить из Google Sheets с таймаутом
+                const sheetsData = await Promise.race([
+                    loadFromGoogleSheets(),
+                    new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Таймаут загрузки (10 секунд)')), 10000)
+                    )
+                ]);
                 
                 if (sheetsData && sheetsData.length > 0) {
                     products = parseGoogleSheetsData(sheetsData);
-                    console.log('Данные загружены из Google Sheets:', products);
+                    const loadTime = Date.now() - loadStartTime;
+                    console.log(`Данные загружены из Google Sheets за ${loadTime}ms:`, products);
                     hideLoading();
                     initProducts();
                 } else {
-                    // Если не удалось загрузить из Google Sheets, показываем ошибку
-                    throw new Error('Не удалось загрузить данные из Google Sheets');
+                    throw new Error('Таблица пуста или не найдена');
                 }
                 
             } catch (error) {
                 console.error('Ошибка загрузки из Google Sheets:', error);
-                showError();
+                const loadTime = Date.now() - loadStartTime;
+                updateLoadingMessage(`Ошибка загрузки (${loadTime}ms): ${error.message}`);
+                setTimeout(() => showError(error.message), 500);
             }
         }
 
         // Загрузка данных из Google Sheets
         async function loadFromGoogleSheets() {
             try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.1kbFFxwRQwLYf99Tv-YXAoztkpIhqaqtntD80cJVKq5o}/values/${GOOGLE_SHEETS_CONFIG.sheetName}?key=${GOOGLE_SHEETS_CONFIG.AIzaSyBRwKMmS9a9WftNvlRuDV21D-EKSInj5aw}`;
+                updateLoadingMessage('Загружаем данные...');
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.1kbFFxwRQwLYf99Tv-YXAoztkpIhqaqtntD80cJVKq5o}/values/${GOOGLE_SHEETS_CONFIG.GingerShopData}?key=${GOOGLE_SHEETS_CONFIG.AIzaSyBRwKMmS9a9WftNvlRuDV21D-EKSInj5aw}`;
                 
                 const response = await fetch(url);
                 
@@ -669,10 +771,11 @@
                 }
                 
                 const data = await response.json();
+                updateLoadingMessage('Обрабатываем данные...');
                 return data.values;
             } catch (error) {
                 console.error('Ошибка загрузки из Google Sheets:', error);
-                return null;
+                throw error;
             }
         }
 
@@ -701,25 +804,96 @@
                     images: images
                 };
                 return product;
-            }).filter(product => product.title !== 'Без названия'); // Фильтруем пустые строки
+            }).filter(product => product.title !== 'Без названия');
+        }
+
+        // Тестовые данные
+        function getTestProducts() {
+            return [
+                {
+                    id: 1,
+                    title: "Набор эко-посуды из бамбука",
+                    price: 1500,
+                    stock: 10,
+                    reserved: 2,
+                    images: [
+                        "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Эко-посуда+1",
+                        "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Эко-посуда+2"
+                    ]
+                },
+                {
+                    id: 2,
+                    title: "Бамбуковая зубная щетка",
+                    price: 250,
+                    stock: 25,
+                    reserved: 5,
+                    images: [
+                        "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Зубная+щетка+1",
+                        "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Зубная+щетка+2"
+                    ]
+                },
+                {
+                    id: 3,
+                    title: "Многоразовые эко-сумки",
+                    price: 450,
+                    stock: 15,
+                    reserved: 3,
+                    images: [
+                        "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Эко-сумка+1",
+                        "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Эко-сумка+2"
+                    ]
+                },
+                {
+                    id: 4,
+                    title: "Натуральное мыло ручной работы",
+                    price: 320,
+                    stock: 20,
+                    reserved: 7,
+                    images: [
+                        "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Натуральное+мыло"
+                    ]
+                }
+            ];
         }
 
         function showLoading() {
             document.getElementById('loading').style.display = 'block';
             document.getElementById('error-container').style.display = 'none';
             document.getElementById('products-container').style.display = 'none';
+            document.getElementById('config-info').style.display = 'none';
+        }
+
+        function updateLoadingMessage(message) {
+            const details = document.getElementById('loading-details');
+            if (details) {
+                details.textContent = message;
+            }
         }
 
         function hideLoading() {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('error-container').style.display = 'none';
             document.getElementById('products-container').style.display = 'grid';
+            document.getElementById('config-info').style.display = 'none';
         }
 
-        function showError() {
+        function showError(message) {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('error-container').style.display = 'block';
             document.getElementById('products-container').style.display = 'none';
+            
+            // Показываем информацию о конфигурации если не настроены ключи
+            if (GOOGLE_SHEETS_CONFIG.spreadsheetId.includes('YOUR_') || 
+                GOOGLE_SHEETS_CONFIG.apiKey.includes('YOUR_')) {
+                document.getElementById('config-info').style.display = 'block';
+            }
+        }
+
+        function useTestData() {
+            products = getTestProducts();
+            console.log('Используем тестовые данные:', products);
+            hideLoading();
+            initProducts();
         }
 
         // Функция для получения доступного количества товара
@@ -893,9 +1067,12 @@
                 hideError();
                 updateFormState();
                 
+                // Анимация добавления в корзину
                 addToCartBtn.textContent = 'Добавлено!';
+                addToCartBtn.style.backgroundColor = 'var(--dark-green)';
                 setTimeout(() => {
                     addToCartBtn.textContent = 'Добавить в корзину';
+                    addToCartBtn.style.backgroundColor = '';
                 }, 1000);
             });
             
@@ -919,6 +1096,13 @@
             
             updateCartUI();
             updateAllProductCards();
+            
+            // Анимация иконки корзины
+            const cartIcon = document.getElementById('cart-icon');
+            cartIcon.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                cartIcon.style.transform = 'scale(1)';
+            }, 300);
         }
 
         // Функция обновления количества товара в корзине
@@ -1129,6 +1313,7 @@
             const cartIcon = document.getElementById('cart-icon');
             const closeCartBtn = document.getElementById('close-cart');
             const reserveAllBtn = document.getElementById('reserve-all-btn');
+            const useTestDataBtn = document.getElementById('use-test-data');
             
             // Загружаем товары из Google Sheets
             loadProducts();
@@ -1136,6 +1321,7 @@
             cartIcon.addEventListener('click', openCartModal);
             closeCartBtn.addEventListener('click', closeCartModal);
             reserveAllBtn.addEventListener('click', reserveAllItems);
+            useTestDataBtn.addEventListener('click', useTestData);
             
             document.getElementById('cart-modal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('cart-modal')) {
