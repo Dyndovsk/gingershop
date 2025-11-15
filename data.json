@@ -1,0 +1,51 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "title": "Набор эко-посуды",
+      "price": 1500,
+      "stock": 10,
+      "reserved": 0,
+      "images": [
+        "images/products/eco-tableware-1.jpg",
+        "images/products/eco-tableware-2.jpg",
+        "images/products/eco-tableware-3.jpg"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Бамбуковая зубная щетка",
+      "price": 250,
+      "stock": 25,
+      "reserved": 0,
+      "images": [
+        "images/products/bamboo-toothbrush-1.jpg",
+        "images/products/bamboo-toothbrush-2.jpg"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Многоразовые сумки",
+      "price": 450,
+      "stock": 8,
+      "reserved": 0,
+      "images": [
+        "images/products/reusable-bags-1.jpg",
+        "images/products/reusable-bags-2.jpg",
+        "images/products/reusable-bags-3.jpg",
+        "images/products/reusable-bags-4.jpg"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Эко-косметика",
+      "price": 1200,
+      "stock": 8,
+      "reserved": 0,
+      "images": [
+        "images/products/eco-cosmetics-1.jpg",
+        "images/products/eco-cosmetics-2.jpg"
+      ]
+    }
+  ]
+}
