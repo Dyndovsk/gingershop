@@ -704,15 +704,15 @@
     <script>
         // КОНФИГУРАЦИЯ GOOGLE SHEETS - ЗАМЕНИТЕ НА ВАШИ ДАННЫЕ
         const GOOGLE_SHEETS_CONFIG = {
-            // ID таблицы (из URL между /d/ и /edit)
-            spreadsheetId: '1YOUR_SPREADSHEET_ID_HERE',
-            
-            // Имя листа в таблице
-            sheetName: 'Products',
-            
-            // Ваш API ключ (нужно создать в Google Cloud Console)
-            apiKey: 'YOUR_GOOGLE_API_KEY_HERE'
-        };
+        // ID таблицы (из URL между /d/ и /edit)
+        spreadsheetId: '1kbFFxwRQwLYf99Tv-YXAoztkpIhqaqtntD80cJVKq5o',
+        
+        // Имя листа в таблице
+        sheetName: 'GingerShopData',
+        
+        // Ваш API ключ (нужно создать в Google Cloud Console)
+        apiKey: 'AIzaSyBRwKMmS9a9WftNvlRuDV21D-EKSInj5aw'
+    };
 
         // Данные товаров
         let products = [];
@@ -762,7 +762,7 @@
         async function loadFromGoogleSheets() {
             try {
                 updateLoadingMessage('Загружаем данные...');
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.1kbFFxwRQwLYf99Tv-YXAoztkpIhqaqtntD80cJVKq5o}/values/${GOOGLE_SHEETS_CONFIG.GingerShopData}?key=${GOOGLE_SHEETS_CONFIG.AIzaSyBRwKMmS9a9WftNvlRuDV21D-EKSInj5aw}`;
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.spreadsheetId}/values/${GOOGLE_SHEETS_CONFIG.sheetName}?key=${GOOGLE_SHEETS_CONFIG.apiKey}`;
                 
                 const response = await fetch(url);
                 
