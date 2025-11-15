@@ -610,72 +610,104 @@
     </footer>
 
     <script>
-        // Данные товаров (в реальном проекте загружались бы из data.json)
+        // Данные товаров
         let products = [];
         let cart = [];
 
-        // Загрузка данных о товарах
+        // Загрузка данных о товарах с сервера
         async function loadProducts() {
             try {
-                // В реальном проекте раскомментируйте эту строку:
-                // const response = await fetch('data.json');
-                // const data = await response.json();
-                // products = data.products;
-                
-                // Для демонстрации используем фиктивные данные:
-                products = [
-                    {
-                        id: 1,
-                        title: "Набор эко-посуды",
-                        price: 1500,
-                        stock: 10,
-                        reserved: 0,
-                        images: [
-                            "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Эко-посуда+1",
-                            "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Эко-посуда+2",
-                            "https://via.placeholder.com/300x200/81C784/FFFFFF?text=Эко-посуда+3"
-                        ]
-                    },
-                    {
-                        id: 2,
-                        title: "Бамбуковая зубная щетка",
-                        price: 250,
-                        stock: 25,
-                        reserved: 0,
-                        images: [
-                            "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Зубная+щетка+1",
-                            "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Зубная+щетка+2"
-                        ]
-                    },
-                    {
-                        id: 3,
-                        title: "Многоразовые сумки",
-                        price: 450,
-                        stock: 8,
-                        reserved: 0,
-                        images: [
-                            "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Сумки+1",
-                            "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Сумки+2",
-                            "https://via.placeholder.com/300x200/81C784/FFFFFF?text=Сумки+3",
-                            "https://via.placeholder.com/300x200/388E3C/FFFFFF?text=Сумки+4"
-                        ]
-                    },
-                    {
-                        id: 4,
-                        title: "Эко-косметика",
-                        price: 1200,
-                        stock: 8,
-                        reserved: 0,
-                        images: [
-                            "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Косметика+1",
-                            "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Косметика+2"
-                        ]
-                    }
-                ];
-                
+                const response = await fetch('update-stock.php');
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки данных');
+                }
+                const data = await response.json();
+                products = data.products;
                 initProducts();
             } catch (error) {
                 console.error('Ошибка загрузки данных:', error);
+                // Запасной вариант - используем локальные данные
+                products = getDefaultProducts();
+                initProducts();
+            }
+        }
+
+        // Функция для получения данных по умолчанию
+        function getDefaultProducts() {
+            return [
+                {
+                    id: 1,
+                    title: "Набор эко-посуды",
+                    price: 1500,
+                    stock: 10,
+                    reserved: 0,
+                    images: [
+                        "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Эко-посуда+1",
+                        "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Эко-посуда+2",
+                        "https://via.placeholder.com/300x200/81C784/FFFFFF?text=Эко-посуда+3"
+                    ]
+                },
+                {
+                    id: 2,
+                    title: "Бамбуковая зубная щетка",
+                    price: 250,
+                    stock: 25,
+                    reserved: 0,
+                    images: [
+                        "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Зубная+щетка+1",
+                        "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Зубная+щетка+2"
+                    ]
+                },
+                {
+                    id: 3,
+                    title: "Многоразовые сумки",
+                    price: 450,
+                    stock: 8,
+                    reserved: 0,
+                    images: [
+                        "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Сумки+1",
+                        "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Сумки+2",
+                        "https://via.placeholder.com/300x200/81C784/FFFFFF?text=Сумки+3",
+                        "https://via.placeholder.com/300x200/388E3C/FFFFFF?text=Сумки+4"
+                    ]
+                },
+                {
+                    id: 4,
+                    title: "Эко-косметика",
+                    price: 1200,
+                    stock: 8,
+                    reserved: 0,
+                    images: [
+                        "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Косметика+1",
+                        "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Косметика+2"
+                    ]
+                }
+            ];
+        }
+
+        // Функция для сохранения бронирований на сервере
+        async function saveReservations(reservations) {
+            try {
+                const response = await fetch('update-stock.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'reserve',
+                        reservations: reservations
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка сохранения бронирования');
+                }
+
+                const result = await response.json();
+                return result.success;
+            } catch (error) {
+                console.error('Ошибка сохранения бронирования:', error);
+                return false;
             }
         }
 
@@ -1028,7 +1060,7 @@
         }
 
         // Функция бронирования всех товаров
-        function reserveAllItems() {
+        async function reserveAllItems() {
             if (cart.length === 0) return;
             
             // Проверяем, что все товары доступны в нужном количестве
@@ -1050,29 +1082,36 @@
             const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             message += `\nИтого: ${totalAmount} руб.`;
             
-            // Обновляем данные о забронированных товарах
-            cart.forEach(item => {
-                const product = products.find(p => p.id === item.id);
-                if (product) {
-                    product.reserved += item.quantity;
-                }
-            });
+            // Сохраняем бронирования на сервере
+            const reservations = cart.map(item => ({
+                id: item.id,
+                quantity: item.quantity
+            }));
             
-            // Кодируем сообщение для URL
-            const encodedMessage = encodeURIComponent(message);
-            const telegramUrl = `https://t.me/Tasha_ginger_art?text=${encodedMessage}`;
+            const saveSuccess = await saveReservations(reservations);
             
-            // Открываем Telegram
-            window.open(telegramUrl, '_blank');
-            
-            // Очищаем корзину после бронирования
-            cart = [];
-            updateCartUI();
-            updateAllProductCards();
-            closeCartModal();
-            
-            // Показываем подтверждение
-            alert('Ваш заказ отправлен в Telegram! Товары забронированы.');
+            if (saveSuccess) {
+                // Обновляем локальные данные после успешного сохранения
+                await loadProducts();
+                
+                // Кодируем сообщение для URL
+                const encodedMessage = encodeURIComponent(message);
+                const telegramUrl = `https://t.me/your_username?text=${encodedMessage}`;
+                
+                // Открываем Telegram
+                window.open(telegramUrl, '_blank');
+                
+                // Очищаем корзину после бронирования
+                cart = [];
+                updateCartUI();
+                updateAllProductCards();
+                closeCartModal();
+                
+                // Показываем подтверждение
+                alert('Ваш заказ отправлен в Telegram! Товары забронированы.');
+            } else {
+                alert('Ошибка сохранения бронирования. Пожалуйста, попробуйте еще раз.');
+            }
         }
 
         // Функции для работы с модальным окном корзины
