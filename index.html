@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Каталог товаров - Бронирование</title>
+    <title>GingerShop - Натуральные товары</title>
     <style>
         :root {
             --white: #ffffff;
@@ -323,6 +323,13 @@
             display: none;
         }
 
+        /* Загрузка */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--green);
+        }
+
         /* Стили для корзины */
         .cart-modal {
             display: none;
@@ -558,7 +565,7 @@
     <!-- Шапка с корзиной -->
     <header>
         <div class="header-content">
-            <div class="logo">ЭкоМаркет</div>
+            <div class="logo">GingerShop</div>
             <div class="cart-icon" id="cart-icon">
                 🛒
                 <span class="cart-count" id="cart-count">0</span>
@@ -568,9 +575,9 @@
 
     <!-- Баннер -->
     <div class="banner">
-        <img src="images/banner.jpg" alt="ЭкоМаркет - Натуральные товары" class="banner-image">
+        <img src="images/banner.jpg" alt="GingerShop - Натуральные товары" class="banner-image">
         <div class="banner-overlay">
-            <h1>ЭкоМаркет</h1>
+            <h1>GingerShop</h1>
             <p>Натуральные товары для здорового образа жизни</p>
         </div>
     </div>
@@ -578,7 +585,10 @@
     <!-- Основной контент -->
     <main>
         <div class="container">
-            <div class="products-grid" id="products-container">
+            <div id="loading" class="loading">
+                <p>Загрузка товаров...</p>
+            </div>
+            <div class="products-grid" id="products-container" style="display: none;">
                 <!-- Карточки товаров будут добавлены с помощью JavaScript -->
             </div>
         </div>
@@ -612,8 +622,8 @@
     <script>
         // Ключи для localStorage
         const STORAGE_KEYS = {
-            PRODUCTS: 'eco_market_products',
-            RESERVATIONS: 'eco_market_reservations'
+            PRODUCTS: 'ginger_shop_products',
+            RESERVATIONS: 'ginger_shop_reservations'
         };
 
         // Данные товаров
@@ -641,10 +651,12 @@
                     updateProductsWithReservations(reservations);
                 }
 
+                hideLoading();
                 initProducts();
             } catch (error) {
                 console.error('Ошибка загрузки данных:', error);
                 products = getDefaultProducts();
+                hideLoading();
                 initProducts();
             }
         }
@@ -750,6 +762,16 @@
                 console.error('Ошибка сохранения бронирований:', error);
                 return false;
             }
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('products-container').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('products-container').style.display = 'grid';
         }
 
         // Функция для получения доступного количества товара
@@ -1135,7 +1157,7 @@
             if (saveSuccess) {
                 // Кодируем сообщение для URL
                 const encodedMessage = encodeURIComponent(message);
-                const telegramUrl = `https://t.me/your_username?text=${encodedMessage}`;
+                const telegramUrl = `https://t.me/Tasha_ginger_art?text=${encodedMessage}`;
                 
                 // Открываем Telegram
                 window.open(telegramUrl, '_blank');
