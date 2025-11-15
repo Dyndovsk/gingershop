@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог товаров - Бронирование</title>
+    <style>
+        :root {
+            --white: #ffffff;
+            --green: #4CAF50;
+            --kraft: #f5e8d0;
+            --dark-green: #2E7D32;
+            --light-green: #E8F5E9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: var(--white);
+            color: #333;
+        }
+        
+        /* Стили для баннера */
+        .banner {
+            background: linear-gradient(135deg, var(--kraft) 0%, var(--light-green) 100%);
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--dark-green);
+            border-bottom: 3px solid var(--green);
+        }
+        
+        .banner h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .banner p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Контейнер для карточек товаров */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        /* Сетка карточек */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        
+        /* Стили карточки товара */
+        .product-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Галерея изображений */
+        .product-gallery {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .gallery-images {
+            display: flex;
+            transition: transform 0.5s ease;
+            height: 100%;
+        }
+        
+        .gallery-image {
+            min-width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+            padding: 0 10px;
+        }
+        
+        .gallery-btn {
+            background-color: rgba(255, 255, 255, 0.7);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--dark-green);
+        }
+        
+        .gallery-dots {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+        }
+        
+        .dot.active {
+            background-color: var(--white);
+        }
+        
+        /* Информация о товаре */
+        .product-info {
+            padding: 20px;
+        }
+        
+        .product-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--dark-green);
+        }
+        
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--green);
+            margin-bottom: 10px;
+        }
+        
+        .product-stock {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        
+        /* Форма бронирования */
+        .reservation-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quantity-btn {
+            background-color: var(--kraft);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--dark-green);
+        }
+        
+        .quantity-input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+        }
+        
+        .reserve-btn {
+            background-color: var(--green);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .reserve-btn:hover {
+            background-color: var(--dark-green);
+        }
+        
+        .reserve-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        /* Сообщение об ошибке */
+        .error-message {
+            color: #f44336;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Баннер -->
+    <header class="banner">
+        <h1>ЭкоМаркет</h1>
+        <p>Натуральные товары для здорового образа жизни</p>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="container">
+        <div class="products-grid" id="products-container">
+            <!-- Карточки товаров будут добавлены с помощью JavaScript -->
+        </div>
+    </main>
+
+    <script>
+        // Данные товаров
+        const products = [
+            {
+                id: 1,
+                title: "Набор эко-посуды",
+                price: 1500,
+                stock: 10,
+                images: [
+                    "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Эко-посуда+1",
+                    "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Эко-посуда+2",
+                    "https://via.placeholder.com/300x200/81C784/FFFFFF?text=Эко-посуда+3"
+                ]
+            },
+            {
+                id: 2,
+                title: "Бамбуковая зубная щетка",
+                price: 250,
+                stock: 25,
+                images: [
+                    "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Зубная+щетка+1",
+                    "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Зубная+щетка+2"
+                ]
+            },
+            {
+                id: 3,
+                title: "Многоразовые сумки",
+                price: 450,
+                stock: 15,
+                images: [
+                    "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Сумки+1",
+                    "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Сумки+2",
+                    "https://via.placeholder.com/300x200/81C784/FFFFFF?text=Сумки+3",
+                    "https://via.placeholder.com/300x200/388E3C/FFFFFF?text=Сумки+4"
+                ]
+            },
+            {
+                id: 4,
+                title: "Эко-косметика",
+                price: 1200,
+                stock: 8,
+                images: [
+                    "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Косметика+1",
+                    "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Косметика+2"
+                ]
+            }
+        ];
+
+        // Функция для создания карточки товара
+        function createProductCard(product) {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <div class="product-gallery">
+                    <div class="gallery-images">
+                        ${product.images.map(img => `<img src="${img}" alt="${product.title}" class="gallery-image">`).join('')}
+                    </div>
+                    <div class="gallery-nav">
+                        <button class="gallery-btn prev-btn">‹</button>
+                        <button class="gallery-btn next-btn">›</button>
+                    </div>
+                    <div class="gallery-dots">
+                        ${product.images.map((_, index) => `<span class="dot ${index === 0 ? 'active' : ''}" data-index="${index}"></span>`).join('')}
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">${product.title}</h3>
+                    <div class="product-price">${product.price} руб.</div>
+                    <div class="product-stock">В наличии: ${product.stock} шт.</div>
+                    <div class="reservation-form">
+                        <div class="quantity-selector">
+                            <button class="quantity-btn minus-btn">-</button>
+                            <input type="number" class="quantity-input" value="1" min="1" max="${product.stock}">
+                            <button class="quantity-btn plus-btn">+</button>
+                        </div>
+                        <button class="reserve-btn">Забронировать</button>
+                        <div class="error-message">Нельзя забронировать больше, чем есть в наличии</div>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Функция для инициализации галереи
+        function initGallery(galleryElement) {
+            const imagesContainer = galleryElement.querySelector('.gallery-images');
+            const prevBtn = galleryElement.querySelector('.prev-btn');
+            const nextBtn = galleryElement.querySelector('.next-btn');
+            const dots = galleryElement.querySelectorAll('.dot');
+            const images = galleryElement.querySelectorAll('.gallery-image');
+            
+            let currentIndex = 0;
+            const totalImages = images.length;
+            
+            function updateGallery() {
+                imagesContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
+                
+                // Обновляем активную точку
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentIndex);
+                });
+            }
+            
+            prevBtn.addEventListener('click', () => {
+                currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+                updateGallery();
+            });
+            
+            nextBtn.addEventListener('click', () => {
+                currentIndex = (currentIndex + 1) % totalImages;
+                updateGallery();
+            });
+            
+            // Добавляем обработчики для точек
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentIndex = index;
+                    updateGallery();
+                });
+            });
+        }
+
+        // Функция для инициализации формы бронирования
+        function initReservationForm(formElement, product) {
+            const minusBtn = formElement.querySelector('.minus-btn');
+            const plusBtn = formElement.querySelector('.plus-btn');
+            const quantityInput = formElement.querySelector('.quantity-input');
+            const reserveBtn = formElement.querySelector('.reserve-btn');
+            const errorMessage = formElement.querySelector('.error-message');
+            
+            // Обработчик уменьшения количества
+            minusBtn.addEventListener('click', () => {
+                let value = parseInt(quantityInput.value);
+                if (value > 1) {
+                    quantityInput.value = value - 1;
+                    validateQuantity();
+                }
+            });
+            
+            // Обработчик увеличения количества
+            plusBtn.addEventListener('click', () => {
+                let value = parseInt(quantityInput.value);
+                if (value < product.stock) {
+                    quantityInput.value = value + 1;
+                    validateQuantity();
+                }
+            });
+            
+            // Валидация при ручном вводе
+            quantityInput.addEventListener('input', validateQuantity);
+            
+            function validateQuantity() {
+                const value = parseInt(quantityInput.value);
+                const max = parseInt(quantityInput.max);
+                
+                if (isNaN(value) || value < 1) {
+                    quantityInput.value = 1;
+                } else if (value > max) {
+                    quantityInput.value = max;
+                    showError();
+                } else {
+                    hideError();
+                }
+            }
+            
+            function showError() {
+                errorMessage.style.display = 'block';
+            }
+            
+            function hideError() {
+                errorMessage.style.display = 'none';
+            }
+            
+            // Обработчик бронирования
+            reserveBtn.addEventListener('click', () => {
+                const quantity = parseInt(quantityInput.value);
+                
+                if (quantity > product.stock) {
+                    showError();
+                    return;
+                }
+                
+                // Формируем сообщение для Telegram
+                const message = `Здравствуйте! Хочу забронировать товар "${product.title}" в количестве ${quantity} шт. на сумму ${product.price * quantity} руб.`;
+                const telegramUrl = `https://t.me/your_username?text=${encodeURIComponent(message)}`;
+                
+                // Открываем Telegram
+                window.open(telegramUrl, '_blank');
+            });
+        }
+
+        // Инициализация страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            const productsContainer = document.getElementById('products-container');
+            
+            // Создаем карточки для каждого товара
+            products.forEach(product => {
+                const card = createProductCard(product);
+                productsContainer.appendChild(card);
+                
+                // Инициализируем галерею
+                const gallery = card.querySelector('.product-gallery');
+                initGallery(gallery);
+                
+                // Инициализируем форму бронирования
+                const form = card.querySelector('.reservation-form');
+                initReservationForm(form, product);
+            });
+        });
+    </script>
+</body>
+</html>
