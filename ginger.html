@@ -25,24 +25,46 @@
             color: #333;
         }
         
-        /* Стили для баннера */
+        /* Стили для баннера с изображением */
         .banner {
-            background: linear-gradient(135deg, var(--kraft) 0%, var(--light-green) 100%);
-            padding: 60px 20px;
+            position: relative;
+            width: 100%;
+            height: 400px;
+            overflow: hidden;
+        }
+        
+        .banner-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .banner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(76, 175, 80, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
-            color: var(--dark-green);
-            border-bottom: 3px solid var(--green);
+            color: white;
+            padding: 20px;
         }
         
         .banner h1 {
             font-size: 2.5rem;
             margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         
         .banner p {
             font-size: 1.2rem;
             max-width: 600px;
-            margin: 0 auto;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
         
         /* Контейнер для карточек товаров */
@@ -223,13 +245,51 @@
             margin-top: 5px;
             display: none;
         }
+
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 768px) {
+            .banner {
+                height: 300px;
+            }
+            
+            .banner h1 {
+                font-size: 2rem;
+            }
+            
+            .banner p {
+                font-size: 1rem;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .banner {
+                height: 250px;
+            }
+            
+            .banner h1 {
+                font-size: 1.5rem;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Баннер -->
+    <!-- Баннер с изображением -->
     <header class="banner">
-        <h1>ЭкоМаркет</h1>
-        <p>Натуральные товары для здорового образа жизни</p>
+        <!-- Замените "images/banner.jpg" на путь к вашему баннеру -->
+        <img src="images/banner.jpg" alt="ЭкоМаркет - Натуральные товары" class="banner-image">
+        <div class="banner-overlay">
+            <h1>ЭкоМаркет</h1>
+            <p>Натуральные товары для здорового образа жизни</p>
+        </div>
     </header>
 
     <!-- Основной контент -->
@@ -240,7 +300,7 @@
     </main>
 
     <script>
-        // Данные товаров
+        // Данные товаров с относительными путями к изображениям
         const products = [
             {
                 id: 1,
@@ -248,9 +308,9 @@
                 price: 1500,
                 stock: 10,
                 images: [
-                    "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Эко-посуда+1",
-                    "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Эко-посуда+2",
-                    "https://via.placeholder.com/300x200/81C784/FFFFFF?text=Эко-посуда+3"
+                    "images/products/eco-tableware-1.jpg",
+                    "images/products/eco-tableware-2.jpg",
+                    "images/products/eco-tableware-3.jpg"
                 ]
             },
             {
@@ -259,8 +319,8 @@
                 price: 250,
                 stock: 25,
                 images: [
-                    "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Зубная+щетка+1",
-                    "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Зубная+щетка+2"
+                    "images/products/bamboo-toothbrush-1.jpg",
+                    "images/products/bamboo-toothbrush-2.jpg"
                 ]
             },
             {
@@ -269,10 +329,10 @@
                 price: 450,
                 stock: 15,
                 images: [
-                    "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Сумки+1",
-                    "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Сумки+2",
-                    "https://via.placeholder.com/300x200/81C784/FFFFFF?text=Сумки+3",
-                    "https://via.placeholder.com/300x200/388E3C/FFFFFF?text=Сумки+4"
+                    "images/products/reusable-bags-1.jpg",
+                    "images/products/reusable-bags-2.jpg",
+                    "images/products/reusable-bags-3.jpg",
+                    "images/products/reusable-bags-4.jpg"
                 ]
             },
             {
@@ -281,8 +341,8 @@
                 price: 1200,
                 stock: 8,
                 images: [
-                    "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Косметика+1",
-                    "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Косметика+2"
+                    "images/products/eco-cosmetics-1.jpg",
+                    "images/products/eco-cosmetics-2.jpg"
                 ]
             }
         ];
@@ -294,7 +354,7 @@
             card.innerHTML = `
                 <div class="product-gallery">
                     <div class="gallery-images">
-                        ${product.images.map(img => `<img src="${img}" alt="${product.title}" class="gallery-image">`).join('')}
+                        ${product.images.map(img => `<img src="${img}" alt="${product.title}" class="gallery-image" onerror="this.src='https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Изображение+не+загружено'">`).join('')}
                     </div>
                     <div class="gallery-nav">
                         <button class="gallery-btn prev-btn">‹</button>
