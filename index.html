@@ -104,9 +104,8 @@
             width: 100%;
             height: 300px;
             overflow: hidden;
-            /* Убираем градиент и добавляем картинку */
             background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
-                        url('./images/banner.jpg') center/cover no-repeat;
+                        url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -119,11 +118,13 @@
         .banner h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
         
         .banner p {
             font-size: 1.2rem;
             max-width: 600px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
         }
         
         /* Основной контент */
@@ -152,6 +153,7 @@
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
         }
         
         .product-card:hover {
@@ -576,6 +578,187 @@
             text-align: center;
         }
         
+        /* Модальное окно товара */
+        .product-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .product-modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalAppear 0.3s ease;
+        }
+
+        .product-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .product-modal-close:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        .product-modal-body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 768px) {
+            .product-modal-body {
+                flex-direction: row;
+            }
+        }
+
+        .product-modal-gallery {
+            flex: 1;
+            min-height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-modal-images {
+            display: flex;
+            transition: transform 0.5s ease;
+            height: 100%;
+        }
+
+        .product-modal-image {
+            min-width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-modal-gallery-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+            padding: 0 15px;
+        }
+
+        .product-modal-gallery-btn {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--dark-green);
+            font-size: 1.2rem;
+            transition: background-color 0.3s;
+        }
+
+        .product-modal-gallery-btn:hover {
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+
+        .product-modal-gallery-dots {
+            position: absolute;
+            bottom: 15px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .product-modal-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .product-modal-dot.active {
+            background-color: var(--white);
+        }
+
+        .product-modal-info {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .product-modal-title {
+            font-size: 1.8rem;
+            color: var(--dark-green);
+            margin-bottom: 15px;
+        }
+
+        .product-modal-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--green);
+            margin-bottom: 15px;
+        }
+
+        .product-modal-description {
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .product-modal-stock-info {
+            background-color: var(--light-green);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--green);
+        }
+
+        .product-modal-stock {
+            margin-bottom: 5px;
+        }
+
+        .product-modal-reserved {
+            color: var(--warning);
+            margin-bottom: 5px;
+        }
+
+        .product-modal-available {
+            color: var(--dark-green);
+            font-weight: bold;
+        }
+
+        .product-modal-add-form {
+            margin-top: 25px;
+        }
+        
         /* Футер */
         footer {
             background-color: var(--kraft);
@@ -672,7 +855,7 @@
                 <h3>Настройка Google Sheets</h3>
                 <p>Для работы магазина необходимо настроить Google Sheets API:</p>
                 <ol>
-                    <li>Создайте таблицу с колонками: ID, Название, Цена, Количество, Забронировано, Изображения</li>
+                    <li>Создайте таблицу с колонками: ID, Название, Цена, Количество, Забронировано, Изображения, Описание</li>
                     <li>Замените значения в константе GOOGLE_SHEETS_CONFIG на свои</li>
                     <li>Убедитесь, что таблица доступна для чтения по API</li>
                 </ol>
@@ -710,6 +893,16 @@
         </div>
     </div>
 
+    <!-- Модальное окно товара -->
+    <div class="product-modal" id="product-modal">
+        <div class="product-modal-content">
+            <button class="product-modal-close" id="product-modal-close">×</button>
+            <div class="product-modal-body" id="product-modal-body">
+                <!-- Контент будет заполнен JavaScript -->
+            </div>
+        </div>
+    </div>
+
     <!-- Футер -->
     <footer>
         <div class="container">
@@ -720,15 +913,15 @@
     <script>
         // КОНФИГУРАЦИЯ GOOGLE SHEETS - ЗАМЕНИТЕ НА ВАШИ ДАННЫЕ
         const GOOGLE_SHEETS_CONFIG = {
-        // ID таблицы (из URL между /d/ и /edit)
-        spreadsheetId: '1kbFFxwRQwLYf99Tv-YXAoztkpIhqaqtntD80cJVKq5o',
-        
-        // Имя листа в таблице
-        sheetName: 'GingerShopData',
-        
-        // Ваш API ключ (нужно создать в Google Cloud Console)
-        apiKey: 'AIzaSyBRwKMmS9a9WftNvlRuDV21D-EKSInj5aw'
-    };
+            // ID таблицы (из URL между /d/ и /edit)
+            spreadsheetId: '1kbFFxwRQwLYf99Tv-YXAoztkpIhqaqtntD80cJVKq5o',
+            
+            // Имя листа в таблице
+            sheetName: 'GingerShopData',
+            
+            // Ваш API ключ (нужно создать в Google Cloud Console)
+            apiKey: 'AIzaSyBRwKMmS9a9WftNvlRuDV21D-EKSInj5aw'
+        };
 
         // Данные товаров
         let products = [];
@@ -817,6 +1010,7 @@
                     price: parseInt(row[2]) || 0,
                     stock: parseInt(row[3]) || 0,
                     reserved: parseInt(row[4]) || 0,
+                    description: row[6] || 'Описание отсутствует', // Новая колонка с описанием
                     images: images
                 };
                 return product;
@@ -832,6 +1026,7 @@
                     price: 1500,
                     stock: 10,
                     reserved: 2,
+                    description: "Экологичный набор посуды из натурального бамбука. Включает тарелки, миски и столовые приборы. Идеально подходит для пикников, кемпинга и повседневного использования. Легкий, прочный и биоразлагаемый.",
                     images: [
                         "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Эко-посуда+1",
                         "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Эко-посуда+2"
@@ -843,6 +1038,7 @@
                     price: 250,
                     stock: 25,
                     reserved: 5,
+                    description: "Экологичная зубная щетка с бамбуковой ручкой и мягкой щетиной. Бамбук - природный антибактериальный материал. Щетка полностью биоразлагаема и не содержит пластика.",
                     images: [
                         "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Зубная+щетка+1",
                         "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Зубная+щетка+2"
@@ -854,6 +1050,7 @@
                     price: 450,
                     stock: 15,
                     reserved: 3,
+                    description: "Стильные многоразовые сумки из органического хлопка. Прочные, вместительные и легко складываются. Идеальная альтернатива пластиковым пакетам. Доступны в нескольких цветах.",
                     images: [
                         "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Эко-сумка+1",
                         "https://via.placeholder.com/300x200/2E7D32/FFFFFF?text=Эко-сумка+2"
@@ -865,6 +1062,7 @@
                     price: 320,
                     stock: 20,
                     reserved: 7,
+                    description: "Мыло ручной работы из натуральных ингредиентов. Без парабенов, сульфатов и искусственных ароматизаторов. Содержит масла ши, оливковое масло и эфирные масла. Нежно ухаживает за кожей.",
                     images: [
                         "https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Натуральное+мыло"
                     ]
@@ -927,6 +1125,9 @@
             
             const card = document.createElement('div');
             card.className = 'product-card';
+            card.style.cursor = 'pointer';
+            card.setAttribute('data-product-id', product.id);
+            
             card.innerHTML = `
                 <div class="product-gallery">
                     <div class="gallery-images">
@@ -960,6 +1161,16 @@
                 </div>
             `;
             
+            // Добавляем обработчик клика на всю карточку
+            card.addEventListener('click', (e) => {
+                // Проверяем, что клик не был на элементах управления (кнопках, инпутах)
+                if (!e.target.closest('.add-to-cart-form') && 
+                    !e.target.closest('.gallery-nav') && 
+                    !e.target.closest('.gallery-dots')) {
+                    openProductModal(product.id);
+                }
+            });
+            
             return card;
         }
 
@@ -982,18 +1193,21 @@
                 });
             }
             
-            prevBtn.addEventListener('click', () => {
+            prevBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 currentIndex = (currentIndex - 1 + totalImages) % totalImages;
                 updateGallery();
             });
             
-            nextBtn.addEventListener('click', () => {
+            nextBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 currentIndex = (currentIndex + 1) % totalImages;
                 updateGallery();
             });
             
             dots.forEach((dot, index) => {
-                dot.addEventListener('click', () => {
+                dot.addEventListener('click', (e) => {
+                    e.stopPropagation();
                     currentIndex = index;
                     updateGallery();
                 });
@@ -1025,7 +1239,8 @@
                 addToCartBtn.textContent = available <= 0 ? 'Нет в наличии' : 'Добавить в корзину';
             }
             
-            minusBtn.addEventListener('click', () => {
+            minusBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 let value = parseInt(quantityInput.value);
                 if (value > 1) {
                     quantityInput.value = value - 1;
@@ -1033,7 +1248,8 @@
                 }
             });
             
-            plusBtn.addEventListener('click', () => {
+            plusBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 let value = parseInt(quantityInput.value);
                 const available = getAvailableQuantity(product.id);
                 if (value < available) {
@@ -1042,7 +1258,8 @@
                 }
             });
             
-            quantityInput.addEventListener('input', () => {
+            quantityInput.addEventListener('input', (e) => {
+                e.stopPropagation();
                 validateQuantity();
                 updateFormState();
             });
@@ -1069,7 +1286,8 @@
                 errorMessage.style.display = 'none';
             }
             
-            addToCartBtn.addEventListener('click', () => {
+            addToCartBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const quantity = parseInt(quantityInput.value);
                 const available = getAvailableQuantity(product.id);
                 
@@ -1093,6 +1311,114 @@
             });
             
             updateFormState();
+        }
+
+        // Функция для открытия модального окна товара
+        function openProductModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            const available = getAvailableQuantity(product.id);
+            
+            const modalBody = document.getElementById('product-modal-body');
+            modalBody.innerHTML = `
+                <div class="product-modal-gallery">
+                    <div class="product-modal-images">
+                        ${product.images.map(img => 
+                            `<img src="${img}" alt="${product.title}" class="product-modal-image" onerror="this.src='https://via.placeholder.com/600x400/4CAF50/FFFFFF?text=Изображение+не+загружено'">`
+                        ).join('')}
+                    </div>
+                    <div class="product-modal-gallery-nav">
+                        <button class="product-modal-gallery-btn prev-btn">‹</button>
+                        <button class="product-modal-gallery-btn next-btn">›</button>
+                    </div>
+                    <div class="product-modal-gallery-dots">
+                        ${product.images.map((_, index) => 
+                            `<span class="product-modal-dot ${index === 0 ? 'active' : ''}" data-index="${index}"></span>`
+                        ).join('')}
+                    </div>
+                </div>
+                <div class="product-modal-info">
+                    <h2 class="product-modal-title">${product.title}</h2>
+                    <div class="product-modal-price">${product.price} руб.</div>
+                    
+                    <div class="product-modal-description">
+                        ${product.description}
+                    </div>
+                    
+                    <div class="product-modal-stock-info">
+                        <div class="product-modal-stock">Всего на складе: ${product.stock} шт.</div>
+                        ${product.reserved > 0 ? 
+                            `<div class="product-modal-reserved">Уже забронировано: ${product.reserved} шт.</div>` : ''}
+                        <div class="product-modal-available">Доступно для брони: ${available} шт.</div>
+                    </div>
+                    
+                    <div class="add-to-cart-form product-modal-add-form">
+                        <div class="quantity-selector">
+                            <button class="quantity-btn minus-btn" ${available <= 0 ? 'disabled' : ''}>-</button>
+                            <input type="number" class="quantity-input" value="1" min="1" max="${available}" ${available <= 0 ? 'disabled' : ''}>
+                            <button class="quantity-btn plus-btn" ${available <= 0 ? 'disabled' : ''}>+</button>
+                        </div>
+                        <button class="add-to-cart-btn" data-product-id="${product.id}" ${available <= 0 ? 'disabled' : ''}>
+                            ${available <= 0 ? 'Нет в наличии' : 'Добавить в корзину'}
+                        </button>
+                        <div class="error-message">Нельзя добавить больше, чем есть в наличии</div>
+                    </div>
+                </div>
+            `;
+            
+            // Инициализация галереи в модальном окне
+            initProductModalGallery();
+            
+            // Инициализация формы добавления в корзину
+            const form = modalBody.querySelector('.add-to-cart-form');
+            initAddToCartForm(form, product);
+            
+            // Показываем модальное окно
+            document.getElementById('product-modal').style.display = 'flex';
+        }
+
+        // Функция для инициализации галереи в модальном окне
+        function initProductModalGallery() {
+            const galleryElement = document.querySelector('.product-modal-gallery');
+            const imagesContainer = galleryElement.querySelector('.product-modal-images');
+            const prevBtn = galleryElement.querySelector('.prev-btn');
+            const nextBtn = galleryElement.querySelector('.next-btn');
+            const dots = galleryElement.querySelectorAll('.product-modal-dot');
+            const images = galleryElement.querySelectorAll('.product-modal-image');
+            
+            let currentIndex = 0;
+            const totalImages = images.length;
+            
+            function updateGallery() {
+                imagesContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
+                
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentIndex);
+                });
+            }
+            
+            prevBtn.addEventListener('click', () => {
+                currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+                updateGallery();
+            });
+            
+            nextBtn.addEventListener('click', () => {
+                currentIndex = (currentIndex + 1) % totalImages;
+                updateGallery();
+            });
+            
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentIndex = index;
+                    updateGallery();
+                });
+            });
+        }
+
+        // Функция для закрытия модального окна товара
+        function closeProductModal() {
+            document.getElementById('product-modal').style.display = 'none';
         }
 
         // Функция добавления товара в корзину
@@ -1330,6 +1656,7 @@
             const closeCartBtn = document.getElementById('close-cart');
             const reserveAllBtn = document.getElementById('reserve-all-btn');
             const useTestDataBtn = document.getElementById('use-test-data');
+            const productModalClose = document.getElementById('product-modal-close');
             
             // Загружаем товары из Google Sheets
             loadProducts();
@@ -1338,9 +1665,24 @@
             closeCartBtn.addEventListener('click', closeCartModal);
             reserveAllBtn.addEventListener('click', reserveAllItems);
             useTestDataBtn.addEventListener('click', useTestData);
+            productModalClose.addEventListener('click', closeProductModal);
             
             document.getElementById('cart-modal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('cart-modal')) {
+                    closeCartModal();
+                }
+            });
+            
+            document.getElementById('product-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('product-modal')) {
+                    closeProductModal();
+                }
+            });
+            
+            // Закрытие по ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeProductModal();
                     closeCartModal();
                 }
             });
