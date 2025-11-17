@@ -759,6 +759,110 @@
             margin-top: 25px;
         }
         
+        /* Кнопка техподдержки */
+        .support-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 999;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .support-button:hover {
+            background-color: var(--dark-green);
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .support-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .support-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            animation: modalAppear 0.3s ease;
+        }
+        
+        .support-title {
+            font-size: 1.5rem;
+            color: var(--dark-green);
+            margin-bottom: 15px;
+        }
+        
+        .support-text {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        
+        .support-telegram-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: var(--green);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            width: 100%;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+        
+        .support-telegram-btn:hover {
+            background-color: var(--dark-green);
+        }
+        
+        .telegram-icon {
+            font-size: 1.2rem;
+        }
+        
+        .close-support {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        
+        .close-support:hover {
+            color: var(--error);
+        }
+        
         /* Футер */
         footer {
             background-color: var(--kraft);
@@ -797,6 +901,14 @@
                 width: 95%;
                 padding: 15px;
             }
+            
+            .support-button {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -820,6 +932,14 @@
             
             .cart-item-quantity {
                 align-self: flex-end;
+            }
+            
+            .support-button {
+                bottom: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+                font-size: 1.2rem;
             }
         }
     </style>
@@ -875,6 +995,9 @@
         </div>
     </main>
 
+    <!-- Кнопка техподдержки -->
+    <button class="support-button" id="support-button">?</button>
+
     <!-- Модальное окно корзины -->
     <div class="cart-modal" id="cart-modal">
         <div class="cart-content">
@@ -903,6 +1026,19 @@
         </div>
     </div>
 
+    <!-- Модальное окно техподдержки -->
+    <div class="support-modal" id="support-modal">
+        <div class="support-content">
+            <h3 class="support-title">Техническая поддержка</h3>
+            <p class="support-text">Есть вопросы или проблемы с работой сайта? Напишите нам в Telegram - мы поможем!</p>
+            <a href="https://t.me/your_support_username" class="support-telegram-btn" target="_blank">
+                <span class="telegram-icon">✈️</span>
+                Написать в поддержку
+            </a>
+            <button class="close-support" id="close-support">Закрыть</button>
+        </div>
+    </div>
+
     <!-- Футер -->
     <footer>
         <div class="container">
@@ -921,6 +1057,11 @@
             
             // Ваш API ключ (нужно создать в Google Cloud Console)
             apiKey: 'AIzaSyBRwKMmS9a9WftNvlRuDV21D-EKSInj5aw'
+        };
+
+        // Конфигурация техподдержки
+        const SUPPORT_CONFIG = {
+            telegramUrl: 'https://t.me/Dynovsk_lev' // Замените на реальный username поддержки
         };
 
         // Данные товаров
@@ -1010,7 +1151,7 @@
                     price: parseInt(row[2]) || 0,
                     stock: parseInt(row[3]) || 0,
                     reserved: parseInt(row[4]) || 0,
-                    description: row[6] || 'Описание отсутствует', // Новая колонка с описанием
+                    description: row[6] || 'Описание отсутствует',
                     images: images
                 };
                 return product;
@@ -1108,6 +1249,15 @@
             console.log('Используем тестовые данные:', products);
             hideLoading();
             initProducts();
+        }
+
+        // Функции для работы с техподдержкой
+        function openSupportModal() {
+            document.getElementById('support-modal').style.display = 'flex';
+        }
+
+        function closeSupportModal() {
+            document.getElementById('support-modal').style.display = 'none';
         }
 
         // Функция для получения доступного количества товара
@@ -1657,6 +1807,8 @@
             const reserveAllBtn = document.getElementById('reserve-all-btn');
             const useTestDataBtn = document.getElementById('use-test-data');
             const productModalClose = document.getElementById('product-modal-close');
+            const supportButton = document.getElementById('support-button');
+            const closeSupportBtn = document.getElementById('close-support');
             
             // Загружаем товары из Google Sheets
             loadProducts();
@@ -1666,6 +1818,8 @@
             reserveAllBtn.addEventListener('click', reserveAllItems);
             useTestDataBtn.addEventListener('click', useTestData);
             productModalClose.addEventListener('click', closeProductModal);
+            supportButton.addEventListener('click', openSupportModal);
+            closeSupportBtn.addEventListener('click', closeSupportModal);
             
             document.getElementById('cart-modal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('cart-modal')) {
@@ -1679,11 +1833,18 @@
                 }
             });
             
+            document.getElementById('support-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('support-modal')) {
+                    closeSupportModal();
+                }
+            });
+            
             // Закрытие по ESC
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     closeProductModal();
                     closeCartModal();
+                    closeSupportModal();
                 }
             });
             
